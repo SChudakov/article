@@ -39,9 +39,9 @@ semen.chudakov7@gmail.com}
 \maketitle
 
 \begin{abstract}
-The paper is devoted to the development of efficient algorithmic tools for solving a set of interrelated problems of computational geometry. To do this, we propose to create a single algorithmic environment with unified data structures that will allow you to generate simple and fast procedures for solving problems as a whole. We build the generator on the basis of the strategy "divide and conquer". We can consider and other computational models that have integral properties for solving problems. For example, we can use a Voronoi Diagram or a Delaunay Triangulation.
-Because a convex hull is key to a set of computational geometry tasks, we offer unified data structures to support it and other geometric objects based on a binary tree and, in particular, a weighted concatenable queue. This allows you to perform procedures for a set of tasks within no more than 
-$O(\log n)$ time. In this case, a consistent and parallel implementation is possible.
+The paper is devoted to the development of an efficient algorithmic tools for solving a set of interrelated computational geometry problems. To do this, a single algorithmic environment with unified data structures is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy. 
+Once a convex hull is key to a set of computational geometry problems, we offer a special weighted concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. \textcolor{red}{This allows to perform procedures for a set of tasks within no more than $O(\log n)$ time.} Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
+In the future the algorithmic environment can be improved to support other \textcolor{blue}{computational models} with similar \textcolor{red}{integral properties} for solving problems. As an example, the Voronoi Diagram or the Delaunay Triangulation can be considered.
 \end{abstract}
 
 \begin{IEEEkeywords}
