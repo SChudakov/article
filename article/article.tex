@@ -40,8 +40,8 @@ semen.chudakov7@gmail.com}
 
 \begin{abstract}
 The paper is devoted to the development of an efficient algorithmic tools for solving a set of interrelated computational geometry problems. To do this, a single algorithmic environment with unified data structures is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy. 
-Once a convex hull is key to a set of computational geometry problems, we offer a special weighted concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. \textcolor{red}{This allows to perform procedures for a set of tasks within no more than $O(\log n)$ time.} Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
-In the future the algorithmic environment can be improved to support other \textcolor{blue}{computational models} with similar \textcolor{red}{integral properties} for solving problems. As an example, the Voronoi Diagram or the Delaunay Triangulation can be considered.
+Once a convex hull is key to a set of computational geometry problems, we offer a special weighted concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. This allows to perform operations needed in algorithm for a set of tasks within no more than $O(\log n)$ time. Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
+In the future the algorithmic environment can be improved to support other \textcolor{blue}{computational models} with similar properties for solving problems. As an example, the Voronoi Diagram or the Delaunay Triangulation can be considered.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -49,57 +49,27 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Single a
 \end{IEEEkeywords}
 
 \section{Introduction}
-\textbf{The current situation in the field of research.} The convex hull problem arises not only in many practical applications, but also is an core tool for solving many others computational geometry problems. 
 
-There are implicit relations between such problems. Currently, the state of the art approach for solving such sets of problems is the single algorithmic environment, which takes advantage of those implicit relations to create a final software product. An example to such approach may be the usage of a generic data structures for solving different problems. Thus, the algorithmic environment allows to reduce complex problems to some basic computations.
+The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprise $S$. The problem of building such a set has a long history. In practice to solve such problem, means to find a subset in $S$, which can be a "skeleton" for the convex hull.
 
-This article introduces a new approach for solving the convex hull problem on a static set of points. Here the divide and conquer strategy is used as a base for the algorithm and the actual convex hull is maintained with a concatenable queue during the computations. The resulting algorithm has the worst case complexity of $O(n\log n)$, whereas the subroutine of merging 2 convex hull has a complexity of $O(log n)$, where $n$ is the number of points.
+It is differentiated between two types of point sets in this case: a static and a dynamic one. In the first case all points are known in advance. The algorithms for solving that kind of problem are well researched and described in \cite{jarvis, graham, quickhull}. In the letter case an algorithm should be able to handle new points which are being added to the initial set and some  being removed from it in real time. \textcolor{teal}{Initially a set of points can either contain points or be empty.} 
 
-Henceforth a notion of a single algorithmic environment is introduced that formalizes the divide and conquer algorithm from a programmatic standpoint. The formalization allows to create a level of abstraction upon an actual implementation of an algorithm and therefore perform computations sequentially and in parallel on a more generic level.
+The first known algorithm for solve such problem was introduces by Preparata in \cite{preparata}. Convex hull is maintained in a form of an AVL tree, that allows to perform operations of adding new points form it. The split and finding of tangents is performed in optimal time of $O(\log n)$. The major drawback of this method is that there is no mean to remote points from the set. 
 
-\textbf{Relevance} consist in a large specter of application problems that computational geometry allows to solve with its methodology. Implementation of those algorithms enables in an single algorithmic environment allows to use them in the development of modern technology and apply them on large datasets.
+Soon after Overmars and van Leeuwen described a method of how a concatenable queue can be used to maintain the convex hull \cite{overmars}. This, as well as special data structure that is based on a balanced binary tree and maintains the information gathered during previous queries, allows to support fully dynamic sets of points and perform add or remove query  $O(\log^2 n)$ in the worst case.
 
-\textbf{The goals of this article} is to design an optimal algorithms for solving the convex hull problem on a static set of points and to create a single algorithmic environment on the divide and conquer principle which allows to execute its algorithms both sequentially and in parallel.
+% new algorithm
+This article introduces a new approach for solving the convex hull problem on a static set of points. Here the ``divide-and-conquer'' strategy is used and the actual convex hull is maintained in a form of a concatenable queue during the computations. The resulting algorithm has the worst case complexity of $O(n\log n)$, whereas the subroutine of merging 2 convex hull has a complexity of $O(log n)$, where $n$ denotes the number of points.
 
-\textbf{Tasks:}
+% unified algorithmic environment
+\textcolor{teal}{The convex hull problem arises not only in many practical applications, but also is an core method for solving many others computational geometry problems. There are implicit relations between such problems.} Currently, the state of the art approach for solving such sets of problems is the single algorithmic environment, which takes advantage of those implicit relations to implement efficient solving methods. An example to such approach may be the usage of a generalized data structures that can be used in different algorithms. \textcolor{teal}{Thus, the algorithmic environment allows to reduce complex problems to some basic computations.}
 
-\begin{enumerate}
-	\item
-	To systematize and analyze existing approaches to solve the aforementioned problem.
-	\item
-	Create a formal description of a new algorithm.
-	\item
-	Formally prove its computational complexity.
-	\item
-	Implement the algorithm and create.
-	\item 
-	Create a single algorithmic environment which allows to execute computational geometry algorithms based on divide and conquer principle sequentially and in parallel.
-	\item
-	Describe practical use cases of the developed software.
-\end{enumerate}
-
-\textbf{Object of research} is methods of convex hull computation, applting the divide and conquer strategy for designing computational geometry algorithms, programmatic tools for executing computations in parallel. To achieve the goals the following \textbf{methods of research} are used: collection the information, information analysis, formalizing of the collected data and method of proving the scientific hypothesis.
-
-\textbf{The application scope} of the results described in this article includes designing of dentures and corsets, where it is necessary to solve a large set of computational geometry problems on large inputs.
-
+In the algorithmic environment the ``divide-and-conquer'' algorithm is formalizes from a programmatic standpoint. The formalization allows to create a level of abstraction upon an actual implementation of an algorithm and therefore perform computations sequentially and in parallel.
 
 \section{Convex hull algorithm}
 \subsection{Previous work}
 
-The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprise $S$. 
-The problem of building such a set has a long history. In practice to solve such problem, means to find a subset of $S$, which can a "skeleton" for the convex hull.
-
-Despite its simplicity, the definition mentioned earlier does not allow to build on its basis an algorithm. To find a solution, it is needed to introduce more notions that will address the nature of the problem in a more detailed way and allow to solve it in a constructively. 
-
-It is differentiated between two types of points set in this case: a static and a dynamic one. In the first case all points are known in advance. The algorithms for solving that kind of problem are well researched and described in \cite{jarvis, graham, quickhull}. In the letter case an algorithm should be able to address the problem on a new points being added to the initial set and some others being removed from it after a certain period of time. Initially a set of points can either contain points or be empty. 
-
-The first known algorithm for solve such problem was introduces by Preparata in \cite{preparata}. Convex hull is maintained in a form of an AVL tree, that allows to perform operations of adding new points form it. The split and finding of tangents is performed in optimal time of $O(\log n)$. The major drawback of this method is that there is no mean to remote points from the set. 
-
-Soon after Overmars and van Leeuwen described a method of how a concatenable queue can be used to maintain the convex hull \cite{overmars}. This, as well as special data structure that is based on a balanced binary tree and maintain the information gathered during previous queries, allows to support fully dynamic sets of points and perform a add or remove query  $O(\log^2 n)$ in the worst case.
-
-
 \subsection{Concatenable queue}
-
 
 Concatenable queue is an Abstract Data Type (ADT), that supports following operations:
 
