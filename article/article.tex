@@ -19,7 +19,7 @@
 
 \begin{document}
 
-\title{Unified data structures to optimize solving a complex of interrelated geometric problems\\
+\title{Unified data structures to optimize solving a complex of interrelated geometric problems*\\
 %{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and should not be used}
 %\thanks{Identify applicable funding agency here. If none, delete this.}
 }
@@ -50,24 +50,31 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Single a
 
 \section{Introduction}
 
-The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprise $S$. The problem of building such a set has a long history. In practice to solve such problem, means to find a subset in $S$, which can be a "skeleton" for the convex hull.
+% relevance
+Nowadays, computational capabilities make it possible to state and to solve more sophisticated problems for which complex mathematical models must be created. This is particularly the case for generic parameterized problems, which parameters may depend on the domain-specific features and can vary over time. As such, the modeling of thermodynamical, biological and chemical processes can be exemplified.
 
-It is differentiated between two types of point sets in this case: a static and a dynamic one. In the first case all points are known in advance. The algorithms for solving that kind of problem are well researched and described in \cite{jarvis, graham, quickhull}. In the letter case an algorithm should be able to handle new points which are being added to the initial set and some  being removed from it in real time. \textcolor{teal}{Initially a set of points can either contain points or be empty.} 
+In practice, the ability to observe the aforementioned processes in real time is particularly valuable. In order to construct an exact visual model of those processes, one need to simultaneously solve a set of geometrical problems. A good approach in this case is to design and implement efficient algorithms with further possibility to parallelize them. There are two options of how to apply this method.
 
-The first known algorithm for solve such problem was introduces by Preparata in \cite{preparata}. Convex hull is maintained in a form of an AVL tree, that allows to perform operations of adding new points form it. The split and finding of tangents is performed in optimal time of $O(\log n)$. The major drawback of this method is that there is no mean to remote points from the set. 
+% design withought single algorithmic environemnt 
+The first option is to design algorithms to solve the problems independently, so that no results obtained during one algorithm are used in the others. The are many efficient parallel algorithms, which are base on this approach. The corresponding results are discussed in [1], where the ''divide-and-conquer``scheme is used to construct the convex hull for two- and three-dimensional space and the Voronoi diagram for two-dimensional space in $O(log N)$ time for the \textcolor{red}{CREW and EREW} computational models.  Furthermore, a rather detailed analysis of other efficient algorithms for the segment intersection and polygon triangulation problems is present.
 
-Soon after Overmars and van Leeuwen described a method of how a concatenable queue can be used to maintain the convex hull \cite{overmars}. This, as well as special data structure that is based on a balanced binary tree and maintains the information gathered during previous queries, allows to support fully dynamic sets of points and perform add or remove query  $O(\log^2 n)$ in the worst case.
+% design using single algorithmic environemnt
+However, sometimes the use of independent algorithms does not provide the desirable efficiency. Therefore, the second option is to implement the algorithms while getting benefit of theirs similarities, such as common data structures. A further step might be taken to separate stages of algorithms and reuse computation results to achieve better performance. Considering the fact that the majority of computational geometry problems use ''divide and conquer`` principle and therefore can be parallelized, it is a good point from where to start the construction of a unified algorithmic environment.
 
-% new algorithm
-This article introduces a new approach for solving the convex hull problem on a static set of points. Here the ``divide-and-conquer'' strategy is used and the actual convex hull is maintained in a form of a concatenable queue during the computations. The resulting algorithm has the worst case complexity of $O(n\log n)$, whereas the subroutine of merging 2 convex hull has a complexity of $O(log n)$, where $n$ denotes the number of points.
+% previous work in the convex hull domain
+The first known algorithm for solve the convex hull problem was introduces by Preparata in \cite{preparata}. Convex hull is maintained in a form of an AVL tree, that allows to perform operations of adding new points form it. The split and finding of tangents is performed in optimal time of $O(\log n)$. The major drawback of this method is that there is no mean to remote points from the set. Soon after Overmars and van Leeuwen described a method of how a concatenable queue can be used to maintain the convex hull \cite{overmars}. This, as well as special data structure that is based on a balanced binary tree and maintains the information gathered during previous queries, allows to support fully dynamic sets of points and perform add or remove query  $O(\log^2 n)$ in the worst case.
 
-% unified algorithmic environment
-\textcolor{teal}{The convex hull problem arises not only in many practical applications, but also is an core method for solving many others computational geometry problems. There are implicit relations between such problems.} Currently, the state of the art approach for solving such sets of problems is the single algorithmic environment, which takes advantage of those implicit relations to implement efficient solving methods. An example to such approach may be the usage of a generalized data structures that can be used in different algorithms. \textcolor{teal}{Thus, the algorithmic environment allows to reduce complex problems to some basic computations.}
+% scope of this article
+In this article we solve \textcolor{red}{a collection of computational geometry problems} with a \textcolor{red}{generalized parallel-recursive} algorithm based on ``divide-and-conquer'' principle in $O(NlogN)$ time. We first describe how the algorithm can be applied to compute the convex hull. From there we consider several other problems where results gained from constructing the convex hull might be used. The partitioning stage of the initial points set is identical for all problems and the results of individual subproblems are maintained in the same data structure, namely, the concatenable queue. This yields good performance in comparison the approach, where intermediate results are recomputed every time.
 
-In the algorithmic environment the ``divide-and-conquer'' algorithm is formalizes from a programmatic standpoint. The formalization allows to create a level of abstraction upon an actual implementation of an algorithm and therefore perform computations sequentially and in parallel.
 
 \section{Convex hull algorithm}
-\subsection{Previous work}
+\subsection{Problem statement}
+
+The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprise $S$. The problem of building such a set has a long history. In practice to solve such problem, means to find a subset in $S$, which can be a "skeleton" for the convex hull.
+
+It is differentiated between two types of point sets in this case: a static and a dynamic one. In the first case all points are known in advance. The algorithms for solving that kind of problem are well researched and described in \cite{jarvis, graham, quickhull}. In the letter case an algorithm should be able to handle new points which are being added to the initial set and some  being removed from it in real time. \textcolor{teal}{Initially a set of points can either contain points or be empty.}
+
 
 \subsection{Concatenable queue}
 
