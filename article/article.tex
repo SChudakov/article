@@ -12,6 +12,11 @@
 \usepackage{diagbox}
 \usepackage{amsthm}
 \usepackage[formats]{listings}
+\lstset{
+	language=Java,
+	basicstyle=\small,
+	breaklines,
+}
 \graphicspath{{images/}}
 \DeclareGraphicsExtensions{.pdf,.png,.jpg}
 \theoremstyle{plane}
@@ -19,10 +24,7 @@
 
 \begin{document}
 
-\title{Unified data structures to optimize solving a complex of interrelated geometric problems*\\
-%{\footnotesize \textsuperscript{*}Note: Sub-titles are not captured in Xplore and should not be used}
-%\thanks{Identify applicable funding agency here. If none, delete this.}
-}
+\title{Unified data structures for solving optimally a set of interrelated computational geometry problems*}
 \author{
 \IEEEauthorblockN{1\textsuperscript{st} Vasyl Tereshchenko}
 \IEEEauthorblockA{\textit{Faculty of computer science and cybernetics} \\
@@ -39,9 +41,9 @@ semen.chudakov7@gmail.com}
 \maketitle
 
 \begin{abstract}
-		The paper is devoted to the development and implementation of an efficient algorithmic model for solving a set of interrelated computational geometry problems. To do this, a unified algorithmic environment with unified data structures is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy. 
-		Once a convex hull is key to a set of computational geometry problems, we offer a concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. This allows to perform operations needed in algorithm for a set of tasks within no more than $O(\log n)$ time. Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
-		In the future the algorithmic environment can be improved to support other computational models with similar properties for solving problems. As an example, the Voronoi Diagram or the Delaunay Triangulation can be considered.
+		The paper is devoted to the development and  of an efficient algorithmic model for solving a set of interrelated computational geometry problems. To do this, a unified algorithmic environment with unified data structures is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy. 
+		Once a convex hull is key to a set of computational geometry problems, we offer a concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. This allows to perform operations needed in algorithm for a set of problems in $O(\log n)$ time. Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
+		In the future the algorithmic environment can be improved to support other computational models with similar properties for solving problems. As an example, the Voronoi diagram or the Delaunay triangulation can be considered.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -50,11 +52,11 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 
 \section{Introduction}
 		
-		Nowadays, advanced computer simulations and visualizing of complex scientific researches as well as large scale technical projects requires to simultaneously solve a set of computational problems. The core of this set are problems of computational geometry and computer graphics. To solve such problems it is needed to create suitable algorithmic frameworks, that would yield accurate results in real time. Existing methods (iLastic \cite{ilastik}, IMARIS \cite{imaris}, ImageJ \cite{imagej}), that are based on set of algorithms implementations organized in a package does not result in desirable efficiency and accuracy. It is worth noting, that there are a lot of parallel algorithms designed to solve specifically certain computational geometry problems \cite{aggarwal,atallah,cole,amato,chen,berkman,goodman,akl,jaja,leeuwen,reif}. Every such algorithm requires its own computational resources and is executed independently from others. In such case some identical steps, such as preprocessing and building data structures, are performed several times. 
+		Nowadays, advanced computer simulations and visualizing of complex scientific researches as well as large scale technical projects requires to simultaneously solve a set of problems. The core of this set are problems of computational geometry and computer graphics. To solve such problems it is needed to create suitable algorithmic frameworks, that would yield accurate results in real time. Existing methods (iLastic \cite{ilastik}, IMARIS \cite{imaris}, ImageJ \cite{imagej}), that are based on a set of algorithms implementations organized in a package does not result in desirable efficiency and accuracy. It is worth noting, that there are a lot of parallel algorithms designed to solve specifically certain computational geometry problems such as in \cite{aggarwal,atallah,cole,amato,chen,berkman,goodman,akl,jaja,leeuwen,reif}. Every such algorithm requires its own computational resources and is executed independently from others. In such case some identical steps, such as preprocessing and building data structures, are performed several times. 
 		
-		Therefore, a important objective in developing of the algorithmic models is to create a universal tool, which would have means to efficiently solve a problems in the set. This tool should also execute identical steps of the algorithms once and be able to represent results of those steps in a form of the common data structures. In \cite{tereshchenko} the notion of a unified algorithmic environment is introduced, which is based on the ``divide-and-conquer'' principle and takes into account the aforementioned features of the algorithms. In particular, the preprocessing and splitting the initial set of data to form the recursion tree is common for all problems and is executed only once. During the merge stage intermediate results are maintained in a weighted concatenable queue. This model does not repeat computations and the intermediate results are highly reused during the algorithms, which yields good performance.
+		Therefore, an important objective in developing the algorithmic models is to create a universal tool, which would have means to efficiently solve a set of problems. This tool should also execute identical steps of the algorithms once and be able to represent results of those steps in a form of the unified data structures. In \cite{tereshchenko} the notion of a unified algorithmic environment is introduced, which is based on the ``divide-and-conquer'' principle and takes into account the aforementioned features of the algorithms. In particular, the preprocessing and splitting the initial set of data to form the recursion tree is common for all problems and is executed only once. During the merge stage intermediate results are maintained in a weighted concatenable queue. This model does not repeat computations and the intermediate results are highly reused during the algorithms, which yields good performance.
 		
-		This article provides detailed explanation on how the concatenable queue used in \cite{tereshchenko} is implemented. It is then used to design an algorithm for the convex hull problem on a static set of points. Finally we provide implementation details and performance analysis for the designed algorithm.
+		In this article we first describe how the convex hull algorithm for a static set of points is decomposed into separate stages and incorporated into our unified algorithmic environment model (UAEM). Then we provide detailed explanation on how the concatenable queue which is used in the algorithm is implemented. Finally we make complexity analysis for the algorithm and evaluate its performance.
 
 \section{Unified algorithmic environment}
 \subsection{Algorithms stages}
@@ -72,9 +74,9 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 % ----------------------------------------------- PREPROCESSING ------------------------------------------------------------
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		In the preprocessing stage, the "inner" points, which lie on a horizontal or vertical line, are removed from the set. Formally, the removal criterion is formulated as follows. For $a = (x_a, y_a)$ we denote $x(a)=x_a$, $y(a)=y_a$. Let points $a_1, a_2, ..., a_k$ lie on one horizontal line and $x(a_1) < x(a_2) <... <x (a_k) $. Then, by the criterion, the points $a_2, a_3, ..., a_{k-1}$ must be removed. Similarly for the vertical case.
+		In the preprocessing stage, the "inner" points, which lie on a horizontal or vertical line, are removed from the set. Formally, the removal criterion is formulated as follows. For $a = (x_a, y_a)$ we denote $x(a)=x_a$, $y(a)=y_a$. Let points $a_1, a_2, ..., a_k$ lie on one horizontal line and $x(a_1) < x(a_2) <... <x (a_k) $. Then, by the criterion, the points $a_2, a_3, ..., a_{k-1}$ must be removed. Analogously for the vertical case.
 		
-		Consider an algorithm that, in a sorted array, for each group of identical elements, deletes all but the first and the last (if the repetition is more than two). The idea behind the algorithm is to use two pointers to delete repetitions by overwriting their place with other non-repeating element. In this way, additional memory usage can be reduced to a constant value. The algorithm makes one pass through the array. At each step, a constant amount of work is performed to decide whether to delete the current item. Given this, the complexity of the above algorithm is $O(n)$.
+		Consider an algorithm that, in a sorted array, for each group of identical elements, deletes all but the first and the last one (if there are more than two repetitions). The idea behind the algorithm is to use two pointers technique to delete repetitions by overwriting their place with other non-repeating element. This way, additional memory usage can be reduced to a constant value. The algorithm makes one pass through the array. At each step, a constant amount of work is performed to decide whether to delete the current item. Given this, the complexity of the above algorithm is $O(n)$.
 		
 		To perform the preprocessing described above, it is needed to:
 		
@@ -96,15 +98,14 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		
-		At the stage of splitting the initial problem, the current set of points is divided into left and right parts of equal size. Since a list is used to store the points, this operations can be completed in $O(1)$ using the formula below:
+		At the stage of splitting the initial problem, the set of points is divided into left and right parts of equal size. Since a array-like data structure is used to store the points, this operations can be completed in $O(1)$ using the formula below:
 		
 		\begin{equation}
 			M_{i,j}=\frac{i+j}{2}
 		\end{equation}
 		The recursion stops when there are no more than $3$ points in the set.
 		
-		For the base case, the set of points can have $2$ or $3$ elements. In the first case the highest of two points forms the upper part of the hull, and the lower - the lower part.
-		To consider the base case of $3$ points, we introduce an additional notion of the tangent slope given by two points on the plane. For arbitrary points $a_1, a_2$ such that $x(a_1)<x(a_2)$ slope is denoted as $\lambda$:
+		For the base case, the set of points can have $2$ or $3$ elements. In the first case the highest of two points forms the upper part of the hull, and the lower - the lower part. To consider the base case of $3$ points, we introduce an additional notion of the tangent slope given by two points on the plane. For arbitrary points $a_1, a_2$ such that $x(a_1)<x(a_2)$ slope is denoted as $\lambda$:
 		
 		\begin{equation}
 			\lambda(a_1, a_2)=\frac{y(a_2)-y(a_1)}{x(a_2)-x(a_1)}
@@ -135,7 +136,7 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 % --------------------------------   THE MERGE STEP ------------------------------------------------------------------------
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		\cite{overmars} provides an algorithm for merging two convex hulls. The essence of the algorithm is to maintain the hull with the help of two concatenated queues. The hull is divided into two parts. In this article, the separation occurs from top to bottom. Then, using the two-pointer technique and the cases described in \cite{overmars}, the proper tangent line is searched. It remains to split the two queues at the 2 found vertices that form the tangent and to merge the remaining parts. An example of performing such a procedure is shown in Fig. \ref{fig:ch_union}.
+		In \cite{overmars} an algorithm for merging two convex hulls is described. The idea of this algorithm is to maintain the hull in two concatenated queues. The hull is divided into two parts. In this article it is divided into the upper and the lower sub-hulls. Then, using the two-pointer technique and the cases described in \cite{overmars}, the proper tangent line is searched. It remains to split the two queues at the found vertices that form the tangent and to merge the remaining parts. An example of performing such a procedure is shown in Fig. \ref{fig:ch_union}.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=0.4\textwidth, height=0.2\textheight]{ch_union}}
@@ -143,7 +144,7 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 			\label{fig:ch_union}
 		\end{figure}
 		
-		It remains to consider the corner cases that arise when performing the merging. The first of these cases is related to the ambiguity of the position of the utmost points in the described representation of the convex hull. The leftmost point of the left hull and the rightmost point of the right hull must belong to the upper parts of the view before finding the tangent line, because otherwise such tangent may be found incorrectly. An example of such incorrect search is given in Fig. \ref{fig:incorect_search}.
+		It remains to consider the corner cases that arise when performing the merging. The first of these cases is related to the ambiguity of the position of the utmost points in the described representation. The leftmost point of the left hull and the rightmost point of the right hull must belong to the upper parts of the view before finding the tangent line, because otherwise such tangent may be found incorrectly. An example of such incorrect search is given in Fig. \ref{fig:incorect_search}.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=0.4\textwidth, height=0.2\textheight]{incorect_search}}
@@ -151,7 +152,7 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 			\label{fig:incorect_search}
 		\end{figure}
 		
-		To avoid such a situation, it is necessary to move the indicated points from their upper parts before merging the sub-hulls. For the rightmost point of the left hull and the leftmost point of the right hull we have the following cases. Similarly to the previous argument, they must be transferred to the upper parts of the hulls. And after merging these points must be transferred to the lower parts of the hull, if they do not belong to the created upper part of the final hull. Otherwise, the formed hull may be incorrect. An example of such case is shown in Fig. \ref{fig:incorect_edge_points}.
+		To avoid such a situation, it is necessary to move the indicated points to the upper sub-hulls before merging them. For the rightmost point of the left hull and the leftmost point of the right hull we have the following cases. Similarly to the previous argument, they must be transferred to the upper parts of the hulls. And after merging these points must be transferred to the lower parts of the hull, if they do not belong to the resulting upper part of the final hull. Otherwise, the formed hull may be incorrect. An example of such case is shown in Fig. \ref{fig:incorect_edge_points}.
 		
 		
 		\begin{figure}[htbp]
@@ -168,8 +169,7 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 			\label{fig:incorect_lower_subhull}
 		\end{figure}
 		
-		To avoid such a situation, it is necessary to perform the step of cutting off the redundant parts of the formed lower sub-hull. Then searching for the left and right pivoting vertices in the concatenable queue is performed. After that, the queue is splits over the found vertices.
-		Fig. \ref{fig:correct_convex_hull} shows correct convex hull.
+		To avoid such a situation, it is necessary to perform the step of cutting off the redundant parts of the formed lower sub-hull. Then searching for the left and right pivoting vertices in the concatenable queue is performed. After that, the queue is split over the found vertices. Fig. \ref{fig:correct_convex_hull} shows correct convex hull.
 		
 		\begin{figure}[htbp]
 			\centerline{\includegraphics[width=0.4\textwidth, height=0.2\textheight]{correct_convex_hull}}
@@ -182,7 +182,7 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 \subsection{``Divide-and-conquer'' algorithm interface}
 
 
-		The next goal of this work is to build a unified algorithmic environment. The construction of such an object requires the combination of an algorithmic database together with the necessary data structures.  In fact, it is necessary to create an interface of generic algorithm based on ``divide-and-conquer'' strategy, which will then be used on a specific set of input data.
+		The next goal of this work is to build a unified algorithmic environment. The construction of such an object requires the combination of an algorithmic database together with the necessary data structures.  In fact, it is needed to create an interface of generic algorithm based on ``divide-and-conquer'' strategy, which will then be used on a specific input data.
 		
 		We start creating the generic interface by listing its components:
 		
@@ -201,9 +201,9 @@ Algorithmic tools,   Computational geometry, Interrelated problems set, Unified 
 			Solving the base case.
 		\end{itemize}
 		
-		Each of these components will represent a function in the future interface. Here there is a clear separation between the input type for the algorithm and the type of result it returns. These two types should be parameters of the algorithm model. One should also pay attention to the input and output types of functions  in the interface.
+		Each of these components will represent a function in the future interface. Here there is a clear separation between the input type for the algorithm and the type of the result it returns. These two types should be parameters of the algorithm model. One should also pay attention to the input and output types of functions  in the interface.
 		
-		A large number of computational geometry algorithms, such as computing minimal spanning tree, the Delaunay triangulation, the Voronoi diagram and the convex hull accept the list of points. However, would be wrong limit the input type in the algorithm interface to a list of points. The reason for this is that some algorithms can use the results of other algorithms as input data. A well known example is the construction of a Delaunay triangulation based on the Voronoi diagram maintained in a special data structure.
+		A large number of computational geometry algorithms, such as computing minimal spanning tree, the Delaunay triangulation, the Voronoi diagram and the convex hull accept the list of points. However, it would be wrong to limit the input type in the algorithm interface to a list of points. The reason for this is the fact that some algorithms can use the results of other algorithms as input data. A well known example is the construction of a Delaunay triangulation based on the Voronoi diagram maintained in a special data structure.
 		
 		Listing \ref{lst:algmodel} shows the constructed algorithm model. $IT$ denotes the input type and $OT$ - output type.
 		
@@ -212,31 +212,33 @@ interface DaCAlgorithm[IT, OT]:
 
   boolean isBaseCase(IT input)
   int inputSize(IT input)
+  
   OT solveBaseCase(IT input)
+  IT preprocess(IT input)
+  
   OT merge(OT first, OT second)
   Pair[IT, IT] divide(IT input)
-  IT preprocess(IT input)
+  
 		\end{lstlisting}
 		
 
 \subsection{Sequential and parallel execution}
 
 		
-		Although this model very accurately describes the class of algorithms, it does not make it possible to solve the problem directly by having input data, which in fact enables to the algorithm from how it will be executed. Here the principles of sequential and parallel execution are explained.
+		Although this model very accurately describes the class of algorithms, it does not make it possible to solve the problem directly by having input data. This in fact allows to divide implementation of the algorithm from how it is executed. Next the principles of sequential and parallel execution are discussed.
 		
-		When executing sequentially an algorithm, its individual sub-tasks computed one by one. We first check if current input is a base case and if so we can directly compute it by calling $solveBaseCase$ procedure. Otherwise input is split with $divide$ and separate sub-problem are solved sequentially. Finally obtained results are merged with $merge$ procedure.
+		When executing sequentially an algorithm, its individual sub-problems are computed one by one. We first check if current input is a base case and if so we can directly compute it by calling $solveBaseCase$ procedure. Otherwise input is split with $divide$ and obtained sub-problem are solved sequentially. Finally obtained results are merged with $merge$ procedure.
 	
-		In parallel execution, it is necessary to take into account that the individual sub-problems can be calculated independently, which significantly speeds up the execution of the algorithm.
+		In parallel execution, we take into account that the individual sub-problems can be calculated independently, which significantly speeds up the execution of the algorithm.
 		
-		To construct the concurrent algorithm, we use the following parallel computation abstraction $computeInParallel(function1, function2)$. which runs the functions $function1$ and $function2$ in simultaneously. We use it solve sub-problem obtained after the splitting the given input. Other than that parallel version is identical to the sequential one.
+		To construct the concurrent execution algorithm, we use the following parallel computation abstraction $computeInParallel(function1, function2)$. which runs the functions $function1$ and $function2$ simultaneously. We use it to solve sub-problem obtained after splitting a given input. Other than that parallel version is identical to the sequential one.
 		
-		From the standpoint of the practical implementation the performance of such algorithm was improved by introducing a limit on the size of sub-tasks that can be calculated in parallel. This allowed to put a threshold on the amount of work for one thread.
-
-
+		Practically, from the implementation standpoint performance of parallel execution was improved by introducing a limit on the size of sub-tasks that can be calculated in parallel. This allowed to put a threshold on the amount of work for one thread.
 
 \section{Implementation details}
 \subsection{Concatenable queue}
 		
+		As shown in \cite{overmars}, the concatenable queue is the key data structure for the algorithm described above and is therefore the basis for the UAEM. Now we will focus on how to efficiently implement it in our algorithmic environment.
 		
 		Concatenable queue is an Abstract Data Type, that supports following operations:
 		
@@ -255,39 +257,36 @@ interface DaCAlgorithm[IT, OT]:
 			MERGE().
 		\end{itemize}
 		
-		By default the elements in a concatenable queue are kept i a certain predefined order \cite{aho}.
+		By default the elements in a concatenable queue are kept i a certain predefined order \cite[pp..~155-157]{aho}.
 		
-		In this article the concatenable queue is implemented as a binary  $B+$ tree. Its vertices are divided into non-leaf and leaf vertices. The leaf vertices contain all data kept in a tree. Every vertex has a pointer to its left and right child. For the leaf vertices those pointers point to the left and right neighbors or $null$ if the vertex is utmost in the tree. 
-		Additionally every vertex keeps a pointer to a vertex with the largest element in its left sub-tree, which  allows to perform binary search \cite{aho}.  An example of such tree is given on fig. 1. The height of each vertex is kept for the balancing during the split and merge operations. It is measured as a maximum amount of steps it is possible to do in order to reach a leaf vertex.
+		In this article the concatenable queue is implemented as a binary  $B+$ tree. Its vertices are divided into non-leaf and leaf ones. The leaf vertices contain all data kept in a tree. Every vertex has a pointer to its left and right child. For the leaf vertices those pointers point to the left and right neighboring leaf vertices or $null$ if the vertex is utmost in the tree. 
+		Additionally every vertex keeps a pointer to a vertex with the largest element in its left sub-tree, which  allows to perform binary search \cite[pp..~155-157]{aho}. The height of each vertex is kept for the balancing during the split and merge operations. It is measured as a maximum amount of steps it is possible to do in order to reach a leaf vertex.
 		
 		From now we will go into details on how this data structure is implemented. 
 		
-		The contains operations is pretty straightforward and uses binary search over the tree vertices so its complexity is $O(\log n)$, where $n$ hereafter denotes the numbers of vertices in the queue.
+		The contains operations is pretty straightforward and uses binary search over the tree so its complexity is $O(\log n)$, where $n$ hereafter denotes the numbers of vertices in the queue.
 		
-		Algorithm of inserting an element in a queue looks like as follows. First, the position of a new vertex is searched. Then the connections between adjacent leaf vertices are broken to insert a new one. Going back a new non-leaf vertices a new vertex is created - parent for the new element and one of its neighbor. The algorithm is formally described on the Listing \ref{lst:insert-alg}.
+		Algorithm of inserting an element in a queue looks like as follows. First, the position of a new vertex is searched. Then the connections between adjacent leaf vertices are broken to insert a new one. Going back a new non-leaf vertex is created - the parent for the new element and one of its neighbor. The algorithm is formally described on the Listing \ref{lst:insert-alg}.
 		
 		\begin{figure}[htbp]
-			\begin{lstlisting}[caption={Queue element insertion algorithm},label={lst:insert-alg},captionpos=b]
+			\begin{lstlisting}[caption={Queue insertion algorithm},label={lst:insert-alg},captionpos=b]
 Node insert(Node node, int e):
   Node result = nil
   if e <= node.leftSubtreeMax.data: 
-  if node.isLeaf:
-  if e == node.data:
-  node.data = e
+  	if node.isLeaf:
+  	  if e == node.data:
+        node.data = e
+  	  else:
+        Node createdLeaf = createLeafBetween(e, node.left, node)
+        result = Node(createdLeaf, createdLeaf, node)
+    else:
+      node.left = insert(node.left, e)
   else:
-  Node createdLeaf = 
-  createLeafBetween(e, node.left, node)
-  result = Node(createdLeaf, createdLeaf, node)
-  else:
-  node.left = insert(node.left, e)
-  else:
-  if node.isLeaf: 
-  Node createdLeaf = 
-  createLeafBetween(e, node, node.right)
-  result = Node(node, node, createdLeaf)
-  else: 
-  // go left and update node.right pointer
-  node.right = insert(node.right, e)
+    if node.isLeaf: 
+      Node createdLeaf = createLeafBetween(e, node, node.right)
+      result = Node(node, node, createdLeaf)
+    else: 
+      node.right = insert(node.right, e)
   
   if result == nil:
   	result = node
@@ -297,81 +296,67 @@ Node insert(Node node, int e):
 			\end{lstlisting}
 		\end{figure}
 		
-		Here the \textit{updateHeight} subroutine updates the value of an element height, the \textit{createLeafBetween} subroutine breaks the connection between adjacent elements and insertion of a new one.
+		Here the \textit{updateHeight} subroutine updates the height value for a given vertex, the \textit{createLeafBetween} subroutine breaks the connection between adjacent vertices ot insert a new one.
 		
-		The \textit{insert} operation. On the first step we find out if $leftSubtreeMax$ point to an element with greater value than the value to be inserted $e$. If so, then if current element is a leaf, a new element is created between the current element and its left neighbor. Otherwise the search proceeds on the left sub-tree of the current element. The case, when $leftSubtreeMax$ is smaller than the value $e$ is analogous. The procedure ends with updating the height on a newly created element. The element is returned as its result value.
+		On the first step we find out if $leftSubtreeMax$ point to an element with greater value than the value to be inserted $e$. If so, then, if current element is a leaf, a new element is created between the current element and its left neighbor. Otherwise the search proceeds on the left sub-tree of the current element. The case, when $leftSubtreeMax$ is smaller than the value $e$ is analogous. The procedure ends with updating the height on a newly created element. The element is returned as its result value.
 		
-		Since on every step we perform a constant amount of work, the complexity of the procedure is $O(h)=O(\log n)$, where $h$ hereafter denotes the height of the tree.
+		Since on every step we perform a constant amount of work, the complexity of the procedure is $O(h)=O(\log n)$, where $h$ hereafter denotes the height of the tree. The operation of removing an element from the queue is performed analogously. 
 		
-		The operation of removing an element from the queue is performed analogously. 
+		The split operation is a bit more complex. As an input the procedure takes current element and value based on which the split is performed. As a result two independent queues are formed. The value, by which the split has been performed, belongs to the left sub-queue. The procedure is formally described on the Listing \ref{lst:split-alg}.
 		
-		The split operation is a bit more complex. As an input the corresponding procedure receives current element and value based on which the split is performed. As a result two independent queues are formed. The value, by which the split has been performed, belongs to the left sub-queue. The procedure is described formally on the Listing \ref{lst:split-alg}.
-		
-		\begin{lstlisting}[caption={Queue plit algorithm},label={lst:split-alg},captionpos=b]
-split(Node node, int e, 
-  ConcatenableQueue leftQueue, 
-  ConcatenableQueue rightQueue): 
+		\begin{lstlisting}[caption={Queue split algorithm},label={lst:split-alg},captionpos=b]
+split(Node node, int e, ConcatenableQueue leftQueue, ConcatenableQueue rightQueue): 
   if node.isLeaf
-  leftQueue.root = node
-  leftQueue.maxNode = node	
-  rightQueue.minNode = node.right	
-  cut(node)
+    leftQueue.root = node
+    leftQueue.maxNode = node	
+    rightQueue.minNode = node.right	
+    cut(node)
   else:
-  if e == node.leftSubtreeMax.data:
-  leftQueue.root = node.left
-  leftQueue.maxNode = node.leftSubtreeMax
+    if e == node.leftSubtreeMax.data:
+      leftQueue.root = node.left
+      leftQueue.maxNode = node.leftSubtreeMax
   	  
-  rightQueue.root = node.right
-  rightQueue.minNode = 
-  node.leftSubtreeMax.right
+     rightQueue.root = node.right
+     rightQueue.minNode = node.leftSubtreeMax.right
   	  
-  cut(node.leftSubtreeMax)
-  else if e < node.leftSubtreeMax.data:
-  split(node.left, e, leftQueue, rightQueue)
-  rightQueue.root = 
-  concatenateNodes(rightQueue.root, 
-  node.right, node.leftSubtreeMax)
-  else:
-  split(node.right, e, leftQueue, rightQueue)
-  leftQueue.root = 
-  concatenateNodes(node.left, 
-  leftQueue.root, node.leftSubtreeMax)
+     cut(node.leftSubtreeMax)
+   else if e < node.leftSubtreeMax.data:
+     split(node.left, e, leftQueue, rightQueue)
+     rightQueue.root = concatenateNodes(rightQueue.root, node.right, node.leftSubtreeMax)
+   else:
+     split(node.right, e, leftQueue, rightQueue)
+     leftQueue.root = concatenateNodes(node.left,  leftQueue.root, node.leftSubtreeMax)
 		\end{lstlisting}
 		
-		Here the $concatenateNodes$ procedure is used. It performs concatenation of two arbitrary elements and uses theirs heights to balance the resulting queue. Its implementation is described further in the work. The $cut$ procedure breaks connection between two adjacent leaf elements in a queue and therefore is trivial. On the first step in the $split$ operation we check, is the current element is a leaf. Is so, its connection are broken and the value of $maxNode$ is updated for the left queue as well as the value of $minNode$ for the right queue. If element is not a leaf, then the procedure continues of either left or right sub-tree. Here a special corner cases is considered, where $leftSubtreeMax$ contain the dividing value. Then the analogous action to the usual search are performed.
+		Here the $concatenateNodes$ procedure is used. It performs concatenation of two arbitrary elements and uses theirs heights to balance the resulting queue. The $cut$ procedure breaks connection between two adjacent leaf elements in a queue and therefore is trivial. On the first step in the $split$ operation we check, is the current element is a leaf. Is so, its connection are broken and the value of $maxNode$ is updated for the left queue as well as the value of $minNode$ for the right queue. If element is not a leaf, then the procedure continues of either left or right sub-tree. Here a special corner cases is considered, where $leftSubtreeMax$ contain the dividing value. Then the analogous action to the usual search are performed.
 		
 		The algorithm of the $concatenateNodes$ procedure is described on the Listing \ref{lst:concatenate-als}.
 		
-		\begin{lstlisting}[caption={Merging two queues using heights},label={lst:concatenate-als},captionpos=b]
-Node concatenateNodes(Node leftNode, 
-  Node rightNode, Node leftSubtreeMax) {
+		\begin{lstlisting}[caption={Merging two queues},label={lst:concatenate-als},captionpos=b]
+Node concatenateNodes(Node leftNode, Node rightNode, Node leftSubtreeMax) {
   if leftNode == nil:
-  return rightNode
+    return rightNode
   else if rightNode == nil: 
-  return leftNode
+    return leftNode
   else if leftNode.height == rightNode.height:
-  Node result = Node(leftSubtreeMax, 
-  leftNode, rightNode)
-  updateHeight(result)
-  return result
+    Node result = Node(leftSubtreeMax, leftNode, rightNode)
+    updateHeight(result)
+    return result
   else if leftNode.height < rightNode.height:
-  rightNode.left = concatenateNodes(leftNode, 
-  rightNode.left, leftSubtreeMax)
-  updateHeight(rightNode)
-  return rightNode
-  else
-  leftNode.right = 
-  concatenateNodes(leftNode.right, 
-  rightNode, leftSubtreeMax)
-  updateHeight(leftNode)
-  return leftNode
+    rightNode.left = concatenateNodes(leftNode, rightNode.left, leftSubtreeMax)
+    updateHeight(rightNode)
+    return rightNode
+  else:
+    leftNode.right = concatenateNodes(leftNode.right, rightNode, leftSubtreeMax)
+    updateHeight(leftNode)
+    return leftNode
 		\end{lstlisting}
 		
-		First, we consider corner cases where one of the elements is $null$. This is required to ensure correctness of the recursion. Then, if the left element is higher than the right, one step down is taken for the left element. If the right element is higher - we take a step down for it. If the heights are equal, the joining point is found and a new element must be created. At each step, it is necessary to update the height of current element as it changes.
+		First, we consider corner cases where one of the elements is $null$. This is needed to ensure correctness of the recursion. Then, if the left element is higher than the right, one step down is taken for the left element. If the right element is higher - we take a step down for it. If the heights are equal, the joining point is found and a new element must be created. At each step, it is necessary to update the height of current element because it changes.
 		
-		We begin by analyzing the complexity of the $split$ procedure by determining the complexity of the $concatenateNodes$ procedure. At each iteration, the step is performed either to the left son of the current element or to the right. The execution of the recursive procedure is finished by merging two elements. Since each step moves us down one level and a constant amount of work is performed for each level, the total complexity of the $concatenateNodes$ procedure is $O(h)=O(\log n)$.
+		We begin analyzing the complexity of the $split$ procedure by determining the complexity of the $concatenateNodes$ procedure. At each iteration, a step is performed either to the left son of the current element or to the right one. The execution of the recursive procedure finishes by merging two elements. Since each step moves us down one level and a constant amount of work is performed for each level, the total complexity of the $concatenateNodes$ procedure is $O(h)=O(\log n)$.
 		
-		The $split$ procedure uses the $concatenateNodes$ function as a subroutine. The complexity a $split$ call is equal to the complexity of $concatenateNodes$. The number of recursive calls $split$ for one split is $\log n$, so the total complexity of the procedure $\log^2 n$.
+		The $split$ procedure uses the $concatenateNodes$ function as a subroutine. The complexity of a $split$ call is equal to the complexity of $concatenateNodes$. The number of recursive $split$ calls for one such operation is $\log n$, so the total complexity of the procedure $\log^2 n$.
 		
 		The merge operation of two queues is reduced to the clamping of their root vertices by the $concatenateNodes$ procedure, so its complexity is $O(\log n)$.
 
@@ -439,7 +424,7 @@ Node concatenateNodes(Node leftNode,
 		\begin{proof}
 			The recursion tree has a height of no more than $\log n$ levels. At the lowest level, the number of sub-tasks created is $\frac{n}{2}$. Thus, each sub-task takes no more than $\frac{n}{2}$ time.
 			
-			Next, $O(\log^2 n)$ work is performed at each level. Having the height of the recursion tree, we get the total final complexity of the algorithm.
+			Next, $O(\log^2 n)$ work is performed at each level. Having the height of the recursion tree, we get the total complexity of the algorithm.
 		\end{proof}
 	
 	
@@ -457,40 +442,47 @@ Node concatenateNodes(Node leftNode,
 		\end{figure}
 \section{Conclusion}
 
+We`ve considered in details the process of designing and implementing the UAEM as well unified data structures for it. In this model a generic interface of a ``divide-and-conquer'' algorithm was created. This allows us to execute the algorithms which are implemented according to this model both sequentially and in parallel. Apart from that concatenable queue was implemented and served as the basis for the model described above.
+
+Using the data structure allowed to significantly reduce the time and computational resources for solving set of problems, such as constructing the convex hull. The algorithmic environment was implemented in Java programming language using its standard library. The main advantages of the developed algorithm are optimized preprocessing stage and the efficiently implemented merge step, due to the usage of concatenable queue.
+
+The performance comparison for both types of execution allows to conclude that the algorithm has high level of parallelism. We`ve achieved speedup of $28\%$ in the best case. It is easy to extend functionality of the created environment either by adding new or modifying existing algorithms. This flexibility is achieved by using the modular principle in its design and choosing optimal abstractions to represent algorithms.
 
 \begin{thebibliography}{00}
-	\bibitem{ilastik} C. Sommer, C. Straehle, U. Köthe and F. A. Hamprecht, ``Ilastik: Interactive learning and segmentation toolkit,'' 2011 IEEE International Symposium on Biomedical Imaging: From Nano to Macro, Chicago, IL, 2011, pp. 230-233.
+	\bibitem{ilastik} C. Sommer, C. Straehle, U. Köthe and F. A. Hamprecht, ``Ilastik: Interactive learning and segmentation toolkit,'' 2011 IEEE International Symposium on Biomedical Imaging: From Nano to Macro, Chicago, IL, 2011, pp.. 230-233.
 	doi: 10.1109/ISBI.2011.5872394
 	
 	\bibitem{imaris} IMARIS Software. Accessed on: 15.04.2019. [Online]. Available: https://imaris.oxinst.com
 	
 	\bibitem{imagej} ImageJ: An open platform for scientific image analysis. Accessed on: 15.04.2019. [Online]. Available: https://imagej.net/Welcome
 	
-	\bibitem{aggarwal} А. Aggarwal et al., ``Parallel computational geometry,'' Algorithmica 3, 1-4 (November 1988), pp. 293-327.
+	\bibitem{aggarwal} А. Aggarwal et al., ``Parallel computational geometry,'' Algorithmica 3, 1-4 (November 1988), pp.. 293-327.
 	
-	\bibitem{atallah} M.J. Atallah, R. Cole, M.T. Goodrich, ``Cascading divide-and-conquer: a technique for designing parallel algorithms,'' SIAM J. Comput. 18, 1989, pp. 499-532.
+	\bibitem{atallah} M.J. Atallah, R. Cole, M.T. Goodrich, ``Cascading divide-and-conquer: a technique for designing parallel algorithms,'' SIAM J. Comput. 18, 1989, pp.. 499-532.
 	
-	\bibitem{cole} R. Cole, M.T. Goodrich, ``Optimal parallel algorithms for polygon and point-set problems,'' In Proceedings of the fourth annual symposium on Computational geometry (SCG '88), ACM, New York, NY, USA, pp. 201-210.
+	\bibitem{cole} R. Cole, M.T. Goodrich, ``Optimal parallel algorithms for polygon and point-set problems,'' In Proceedings of the fourth annual symposium on Computational geometry (SCG '88), ACM, New York, NY, USA, pp.. 201-210.
 	
-	\bibitem{amato} N. M. Amato, M. T. Goodrich and E. A. Ramos, ``Parallel algorithms for higher-dimensional convex hulls,'' Proceedings 35th Annual Symposium on Foundations of Computer Science, Santa Fe, NM, USA, 1994, pp. 683-694.
+	\bibitem{amato} N.M. Amato, M.T. Goodrich and E.A. Ramos, ``Parallel algorithms for higher-dimensional convex hulls,'' Proceedings 35th Annual Symposium on Foundations of Computer Science, Santa Fe, NM, USA, 1994, pp.. 683-694.
 	
-	\bibitem{chen} D. Z. Chen, ``Efficient geometric algorithms on the EREW PRAM,'' in IEEE Transactions on Parallel and Distributed Systems, vol. 6, no. 1, pp. 41-47, Jan. 1995.
+	\bibitem{chen} D.Z. Chen, ``Efficient geometric algorithms on the EREW PRAM,'' in IEEE Transactions on Parallel and Distributed Systems, vol. 6, no. 1, pp.. 41-47, Jan. 1995.
 	doi: 10.1109/71.363412
 	
-	\bibitem{berkman} O. Berkman, B. Schieber, U. Vishkin, ``A fast parallel algorithm for finding the convex hull of a sorted point set,'' Internat. J. Comput. Geom. Appl. 6, 1996, pp. 231-242.
+	\bibitem{berkman} O. Berkman, B. Schieber, U. Vishkin, ``A fast parallel algorithm for finding the convex hull of a sorted point set,'' Internat. J. Comput. Geom. Appl. 6, 1996, pp.. 231-242.
 	
 	\bibitem{goodman} J.E. Goodman and J. O'Rourke, editors,  Handbook of Discrete and Computational Geometry, CRC Press LLC, Boca Raton, FL, 2004.
 
-	\bibitem{akl} Selim G. Akl and Kelly A. Lyons, Parallel Computational Geometry. Englewood Cliffs: Prentice-Hall, 1993.
+	\bibitem{akl} Selim G. Akl and Kelly A. Lyons, Parallel Computational Geometry, Englewood Cliffs: Prentice-Hall, 1993.
 	
 	\bibitem{jaja} J. JaJa, An Introduction to Parallel Algorithms, Amsterdam: Addison-Wesley, 1992.
 	
-	\bibitem{leeuwen} J. Van Leeuwen, Handbook of Theoretical Computer Science, Amsterdam: Elsevier/The MIT
-	Press, 1990.
+	\bibitem{leeuwen} J. Van Leeuwen, Handbook of Theoretical Computer Science, Amsterdam: Elsevier/The MIT Press, 1990.
 	
 	\bibitem{reif} J.H. Reif, Synthesis of Parallel Algorithms, San Mateo: Morgan Kaufmann, 1993.
 	
-	\bibitem{tereshchenko} V. N. Tereshchenko, A. V. Anisimov, Recursion and parallel algorithms in geometric modeling
-	problems, Journal: Cybernetics and Systems Analysis: Vol. 46, N 2 (2010), pp. 173-184.
+	\bibitem{tereshchenko} V. N. Tereshchenko, A. V. Anisimov, Recursion and parallel algorithms in geometric modeling problems, Journal: Cybernetics and Systems Analysis: Vol. 46, N 2 (2010), pp.. 173-184.
+	
+	\bibitem{overmars} Mark H. Overmars, Jan van Leeuwen, ``Maintenance of configurations in the plane,'' Journal of Computer and System Sciences, Volume 23, Issue 2, 1981, pp.. 166-204.
+	
+	\bibitem{aho} Alfred V. Aho and John E. Hopcroft, The Design and Analysis of Computer Algorithms, 1st ed. Addison-Wesley Longman Publishing Co., Inc., Boston, MA, USA, 1974.
 \end{thebibliography}
 \end{document}
