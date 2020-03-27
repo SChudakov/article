@@ -41,23 +41,23 @@
 \maketitle
 
 \begin{abstract}
-	This paper is devoted to the development and  of an efficient algorithmic model for solving a set of interrelated computational geometry problems. To do this, a unified algorithmic environment with unified data structures is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy. 
- 	Once a convex hull is key to a set of computational geometry problems, we offer a concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. This allows to perform operations needed in algorithm for a set of problems in $O(\log n)$ time. Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
+	This paper is devoted to the development of an algorithmic model, which will be able to solve a set of interrelated computational geometry problems efficiently. To do this, an algorithmic environment with unified data structure is created, which allows to implement complex use cases efficiently with respect to computational resources. We build the environment on the basis of the ``divide and conquer'' strategy.
+ 	Once a convex hull is key to a set of computational geometry problems, we offer a concatenable queue data structure to maintain it. The data structure is implemented in a form of a binary tree. This allows to perform operations needed in algorithms for a set of problems in $O(\log n)$ time. Furthermore we offer a way to execute the algorithms both sequentially and in parallel.
 \end{abstract}
 
 \section{Introduction}
 \label{sec:introduction}
 
-	Nowadays, advanced computer simulations and visualizing of complex scientific researches as well as large scale technical projects requires to simultaneously solve a set of problems. To solve such problems it is needed to create suitable algorithmic frameworks, that would yield accurate results in real time. Existing methods (iLastic \cite{ilastik}, IMARIS \cite{imaris}, ImageJ \cite{imagej}), that are based on a set of algorithms implementations organized in a package do not result in desirable efficiency and accuracy. It is worth noting, that there are a lot of parallel algorithms designed to solve specifically certain computational geometry problems such as in \cite{aggarwal,atallah,cole,amato,chen,berkman,goodman,akl,jaja,leeuwen,reif}. Every such algorithm requires its own computational resources and is executed independently from others. In such case some identical steps, such as preprocessing and building data structures, are performed several times. 
+	Nowadays, advanced computer simulations and visualizations of complex scientific researches as well as large scale technical projects require to simultaneously solve a set of problems. To solve such problems it is needed to create suitable algorithmic frameworks, that would yield accurate results in real time. Existing methods (iLastic \cite{ilastik}, IMARIS \cite{imaris}, ImageJ \cite{imagej}), that are based on a set of algorithms implementations organized in a package do not result in desirable efficiency and accuracy. It is worth noting, that there are a lot of parallel algorithms designed to solve specifically certain computational geometry problems such as in \cite{aggarwal,atallah,cole,amato,chen,berkman,goodman,akl,jaja,leeuwen,reif}. Every such algorithm requires its own computational resources and is executed independently from others. In such cases some identical steps, such as preprocessing and building data structures, are performed several times. 
 	
-	Therefore, an important objective in developing the algorithmic models is to create a universal tool, which would have means to efficiently solve a set of problems. This tool should also execute identical steps of the algorithms once and be able to represent results of those steps in a form of the unified data structures. In \cite{tereshchenko} the notion of a unified algorithmic environment is introduced, which is based on the ``divide-and-conquer'' principle and takes into account the aforementioned features of the algorithms. In particular, the preprocessing and splitting the initial set of data to form the recursion tree is common for all problems and is executed only once. During the merge stage intermediate results are maintained in a weighted concatenable queue. This model does not repeat computations and the intermediate results are highly reused during the algorithms, which yields good performance.
+	Therefore, an important objective in developing algorithmic models is to create a universal tool, which would have means to efficiently solve a set of problems. This tool should also execute identical steps of the algorithms once and be able to represent results of those steps in a form of unified data structures. In \cite{tereshchenko} the notion of a unified algorithmic environment is introduced, which is based on the ``divide-and-conquer'' principle and takes into account the aforementioned features of the algorithms. In particular, preprocessing and splitting the initial set of data to form recursion tree is common for all problems and is executed only once. During the merge stage intermediate results are maintained in a weighted concatenable queue. This model does not repeat computations and the intermediate results are highly reused during the algorithms, which yields good performance.
 	
 	%In this article we first describe how the convex hull algorithm for a static set of points is decomposed into separate stages and incorporated into our unified algorithmic environment model (UAEM). Then we provide detailed explanation on how the concatenable queue which is used in the algorithm is implemented. Finally we make complexity analysis for the algorithm and evaluate its performance.
 
 
 \section{Unified algorithmic environment}
 \label{sec:unified-algorithmic-environment}
-\subsection{Algorithms stages}
+\subsection{Stages of the algorithms}
 
 
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -65,9 +65,9 @@
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	In this section we describe the principle of how we decompose each algorithm into distinct parts. This partition is then used to avoid repeating the computations in the algorithmic environment. The principle will be show on a convex hull algorithm which is similar to the one describe in \cite{overmars} but operates on a static set of points.
+	In this section we described the principle of how we decompose each algorithm into distinct parts. This partition is then used to avoid repeating the computations in the algorithmic environment. The principle will be shown on a convex hull algorithm which is similar to the one describe in \cite{overmars} but operates on a static set of points.
 	
-	The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprise $S$. In practice to solve such problem, means to find a subset in $S$, which can be a "skeleton" for the convex hull.
+	The notion of a convex hull is simple. For a set of points $S$ in a $k$-dimensional space it is a smallest convex set, that comprises $S$. In practice to solve such a problem, means to find a subset in $S$, which can be a "skeleton" for the convex hull. From now on we will consider the case where $k=2$.
 	
 	
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,9 +75,9 @@
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	In the preprocessing stage, the "inner" points, which lie on a horizontal or vertical line, are removed from the set. Formally, the removal criterion is formulated as follows. For $a = (x_a, y_a)$ we denote $x(a)=x_a$, $y(a)=y_a$. Let points $a_1, a_2, ..., a_k$ lie on one horizontal line and $x(a_1) < x(a_2) <... <x (a_k) $. Then, by the criterion, the points $a_2, a_3, ..., a_{k-1}$ must be removed. Analogously for the vertical case.
+	In the preprocessing stage, the "inner" points, which lie on a horizontal or vertical line, are removed from the set. Formally, the removal criterion is formulated as follows. For $a = (x_a, y_a)$ we denote $x(a)=x_a$, $y(a)=y_a$. Let the points $a_1, a_2, ..., a_k$ lie on one horizontal line and $x(a_1) < x(a_2) <... <x (a_k) $. Then, by the criterion, the points $a_2, a_3, ..., a_{k-1}$ must be removed. Analogously for the vertical case.
 	
-	Consider an algorithm that, in a sorted array, for each group of identical elements, deletes all but the first and the last one. The idea behind the algorithm is to use two pointers technique to delete repetitions by overwriting their place with other non-repeating element. At each step, constant work is performed to decide whether to overwrite the current item. Given this, the complexity of the above algorithm is $O(n)$.
+	Consider an algorithm that, in a sorted array, for each group of identical elements, deletes all but the first and the last one. The idea behind the algorithm is to use a two pointers technique to delete repetitions by overwriting their place with other non-repeating elements. At each step, constant work is performed to decide whether to overwrite the current item. Given this, the complexity of the above algorithm is $O(n)$.
 	
 	%To perform the preprocessing described above, it is needed to:
 	
@@ -99,17 +99,17 @@
 	% //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	
-	At the stage of splitting the initial problem, the set of points is divided into left and right parts of equal size. Since a array-like data structure is used to store the points, this operations can be done in $O(1)$ by computing middle positiong in the array.
+	At the stage of splitting the initial problem, the set of points is divided into left and right parts of equal size. Since an array-like data structure is used to store the points, this operations can be done in $O(1)$ by computing middle position of the array.
 	
 	%\begin{equation}
 	%	M_{i,j}=\frac{i+j}{2}
 	%\end{equation}
-	The recursion stops when there are $2$ or $3$ elements in the array. First case is triial. To consider the base case of $3$ points, we introduce a notion of the tangent slope given by two points on the plane. For arbitrary points $a_1, a_2$ such that $x(a_1)<x(a_2)$ slope is denoted as $\lambda$:
+	The recursion stops when there are $2$ or $3$ elements in the array. The former case is trivial. To consider the base case of $3$ points, we introduce a notion of the tangent slope given by two points on the plane. For arbitrary points $a_1, a_2$ such that $x(a_1)<x(a_2)$ their slope is denoted as $\lambda$:
 	
 	\begin{equation}
 	\lambda(a_1, a_2)=\frac{y(a_2)-y(a_1)}{x(a_2)-x(a_1)}
 	\end{equation}
-	According to this definition, the possible cases for points $a_1,a_2,a_3$ are given in Table \ref{table:3points}:
+	According to this definition, the possible cases for the points $a_1,a_2,a_3$ are given in Table \ref{table:3points}:
 	
 	\begin{table}[htbp]
 	\caption{3-points base cases}
@@ -155,13 +155,13 @@
 		\label{fig:incorect_search}
 	\end{figure}
 	
-	To avoid such a situation, it is necessary to move the indicated points to the upper sub-hulls before merging them. For the rightmost point of the left hull and the leftmost point of the right hull we have the following cases. Similarly to the previous argument, they must be transferred to the upper parts of the hulls. And after merging these points must be transferred to the lower parts of the hull, if they do not belong to the resulting upper part of the final hull. Otherwise, the formed hull may be incorrect. An example of such case is shown in Fig. \ref{fig:incorect_edge_points}.
+	To avoid such a situation, it is necessary to move the indicated points to the upper sub-hulls before merging them. For the rightmost point of the left hull and the leftmost point of the right hull we have the following cases. Similarly to the previous argument, they must be transferred to the upper parts of the hulls. And after merging, these points must be transferred to the lower parts of the hull, if they do not belong to the resulting upper part of the final hull. Otherwise, the formed hull may be incorrect. An example of such case is shown in Fig. \ref{fig:incorect_edge_points}.
 	
 	
 	\begin{figure}[t]
 		\centering
 		\includegraphics[width=0.8\textwidth, height=0.3\textheight]{incorect_edge_points}
-		\caption{Example of a convex hull for a wrong position of the utmost left points of the left sub-hull}
+		\caption{Example of a convex hull for a wrong position of the utmost left point of the left sub-hull}
 		\label{fig:incorect_edge_points}
 	\end{figure}
 	
@@ -174,7 +174,7 @@
 		\label{fig:incorect_lower_subhull}
 	\end{figure}
 	
-	To avoid such a situation, it is necessary to perform the step of cutting off the redundant parts of the formed lower sub-hull. Then searching for the left and right pivoting vertices in the concatenable queue is performed. After that, the queue is split over the found vertices. Fig. \ref{fig:correct_convex_hull} shows correct convex hull.
+	To avoid such a situation, it is necessary to perform the step of cutting off the redundant parts of the formed lower sub-hull. Then searching for the left and right pivoting vertices in the concatenable queue is performed. After that, the queue is split over the found vertices. Fig. \ref{fig:correct_convex_hull} shows the correct convex hull.
 	
 	\begin{figure}[t]
 		\centering
@@ -188,9 +188,9 @@
 \subsection{``Divide-and-conquer'' algorithm interface}
 
 
-	The next goal of this work is to build a unified algorithmic environment. The construction of such an object requires the combination of an algorithmic database together with the necessary data structures.  In fact, it is needed to create an interface of generic algorithm based on ``divide-and-conquer'' strategy, which will then be used on a specific input data.
+	The next goal of this work is to build a unified algorithmic environment. The construction of such an object requires the combination of an algorithmic database together with the necessary data structures.  In fact, it is needed to create an interface for generic algorithms based on a ``divide-and-conquer'' strategy, which will then be used on specific input data.
 	
-	The proposed generic interface for the ``divide-and-conquer'' algorithm is described on the Listing \ref{lst:algmodel}.
+	The proposed generic interface for the ``divide-and-conquer'' algorithm is described in Listing \ref{lst:algmodel}.
 	
 	\begin{lstlisting}[caption={Algorithm model based on the ``divide-and-conquer'' principle},label={lst:algmodel},captionpos=t,float,abovecaptionskip=-\medskipamount]
 interface DaCAlgorithm[IT, OT]:
@@ -243,27 +243,27 @@ interface DaCAlgorithm[IT, OT]:
 \subsection{Sequential and parallel execution}
 	
 	
-	Although this model very accurately describes the class of algorithms, it does not make it possible to solve the problem directly by having input data. This in fact allows to divide implementation of the algorithm from how it is executed. Next the principles of sequential and parallel execution are discussed.
+	Although this model very accurately describes the class of algorithms, it does not make it possible to solve the problem directly by having input data. This in fact allows to separate implementation of the algorithm from how it is executed. Next the principles of sequential and parallel execution are discussed.
 	
-	When executing sequentially an algorithm, its individual sub-problems are computed one by one. We first check if current input is a base case and if so we can directly compute it by calling $solveBaseCase$ procedure. Otherwise input is split with $divide$ and obtained sub-problem are solved sequentially. Finally obtained results are merged with $merge$ procedure.
+	When executing sequentially an algorithm, its individual sub-problems are computed one by one. We first check if the current input is a base case and if so we can directly compute it by calling $solveBaseCase$ procedure. Otherwise the input is split with $divide$ and the obtained sub-problem are solved sequentially. Finally the obtained results are merged with $merge$ procedure.
 	
 	In parallel execution, we take into account that the individual sub-problems can be calculated independently, which significantly speeds up the execution of the algorithm.
 	
-	To construct the concurrent execution algorithm, we use the following parallel computation abstraction $computeInParallel(function1, function2)$. which runs the functions $function1$ and $function2$ simultaneously. We use it to solve sub-problem obtained after splitting a given input. Other than that parallel version is identical to the sequential one.
+	To construct the concurrent execution algorithm, we use the following parallel computation abstraction $computeInParallel(function1, function2)$ which runs the functions $function1$ and $function2$ simultaneously. We use it to solve sub-problems obtained after splitting a given input. Other than that parallel version is identical to the sequential one.
 	
-	Practically, from the implementation standpoint performance of parallel execution was improved by introducing a limit on the size of sub-tasks that can be calculated in parallel. This allowed to put a threshold on the amount of work for one thread.
+	From the implementation standpoint, the performance of parallel execution was improved by introducing a limit on the size of sub-tasks that can be calculated in parallel. This allowed to put a threshold on the amount of work for one thread.
 
 
 \section{Implementation details}
 \label{sec:implementation-details}
 \subsection{Concatenable queue}
 
-	As shown in \cite{overmars}, the concatenable queue is the key data structure for the algorithm described above and is therefore the basis for the UAEM.
+	As shown in \cite{overmars}, the concatenable queue is the key data structure for the algorithm described above and is therefore the basis for the unified algorithmic model.
 	
-	Concatenable queue is an Abstract Data Type. Its operations are shown on Table \ref{table:cqueue-operations} together with theirs time complexities in our implementation:
+	Concatenable queue is an Abstract Data Type. Its operations are shown on Table \ref{table:cqueue-operations} together with their time complexities in our implementation:
 	
 	\begin{table}[htbp]
-		\caption{Concatebable queue operations}
+		\caption{Concatenable queue operations}
 		\label{table:cqueue-operations}
 		\begin{center}
 			\begin{tabular}{|c|c|}
@@ -311,9 +311,9 @@ interface DaCAlgorithm[IT, OT]:
 	
 	%The contains operations is pretty straightforward and uses binary search over the tree so its complexity is $O(\log n)$, where $n$ hereafter denotes the numbers of vertices in the queue.
 	
-	%Algorithm of inserting an element in a queue looks like as follows. First, the position of a new vertex is searched. Then the connections between adjacent leaf vertices are broken to insert a new one. Going back a new non-leaf vertex is created - the parent for the new element and one of its neighbor. The algorithm is formally described on the Listing \ref{lst:insert-alg}.
+	%Algorithm of inserting an element in a queue looks like as follows. First, the position of a new vertex is searched. Then the connections between adjacent leaf vertices are broken to insert a new one. Going back a new non-leaf vertex is created - the parent for the new element and one of its neighbor. The algorithm is formally described in Listing \ref{lst:insert-alg}.
 	
-	%The algorithm of inserting an element in a queue is described on the Listing \ref{lst:insert-alg}.
+	%The algorithm of inserting an element in a queue is described in Listing \ref{lst:insert-alg}.
 	
 %	\begin{figure}[htbp]
 %		\begin{lstlisting}[caption={Queue insertion algorithm},label={lst:insert-alg},captionpos=b]
@@ -352,7 +352,7 @@ interface DaCAlgorithm[IT, OT]:
 	
 %	The split operation is a bit more complex. 
 %	As an input the procedure takes current element and value based on which the split is performed. As a result two independent queues are formed. The value, by which the split has been performed, belongs to the left sub-queue. 
-%	Its algorithm is described on the Listing \ref{lst:split-alg}.
+%	Its algorithm is described in Listing \ref{lst:split-alg}.
 	
 %	\begin{lstlisting}[caption={Queue split algorithm},label={lst:split-alg},captionpos=b]
 %split(Node node, int e, ConcatenableQueue leftQueue, ConcatenableQueue rightQueue):
@@ -381,7 +381,7 @@ interface DaCAlgorithm[IT, OT]:
 %	Here the $concatenateNodes$ procedure is used. It performs concatenation of two arbitrary elements and uses theirs heights to balance the resulting queue. The $cut$ procedure breaks connection between two adjacent leaf elements in a queue and therefore is trivial. 
 %	On the first step in the $split$ operation we check, is the current element is a leaf. Is so, its connection are broken and the value of $maxNode$ is updated for the left queue as well as the value of $minNode$ for the right queue. If element is not a leaf, then the procedure continues of either left or right sub-tree. Here a special corner cases is considered, where $leftSubtreeMax$ contain the dividing value. Then the analogous action to the usual search are performed.
 	
-%	The algorithm of the $concatenateNodes$ procedure is described on the Listing \ref{lst:concatenate-als}.
+%	The algorithm of the $concatenateNodes$ procedure is described in Listing \ref{lst:concatenate-als}.
 	
 %	\begin{lstlisting}[caption={Merging two queues},label={lst:concatenate-als},captionpos=b]
 %Node concatenateNodes(Node leftNode, Node rightNode, Node leftSubtreeMax) {
@@ -488,7 +488,7 @@ interface DaCAlgorithm[IT, OT]:
 % //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-	A number of algorithm performance measurements were performed for different input sizes and the average number of recursive subproblems per thread. The results are shown on the Fig. \ref{fig:performance}.
+	A number of algorithm performance measurements were performed for different input sizes and the average number of recursive subproblems per thread. The results are shown in Fig. \ref{fig:performance}.
 	
 	\begin{figure}[h]
 		\centering
@@ -501,9 +501,9 @@ interface DaCAlgorithm[IT, OT]:
 \section{Conclusion}
 \label{sec:coclusion}
 
-	We`ve considered in details the process of designing and implementing the UAEM as well unified data structures for it. In this model a generic interface of a ``divide-and-conquer'' algorithm was created. This allows us to execute the algorithms which are implemented according to this model both sequentially and in parallel. Apart from that concatenable queue was implemented and served as the basis for the model described above.
+	We've considered in details the process of designing and implementing the unified algorithmic model as well as unified data structures for it. In this model a generic interface of a ``divide-and-conquer'' algorithm was created. This allows us to execute the algorithms which are implemented according to this model both sequentially and in parallel. Apart from that a concatenable queue was implemented and served as the basis for the model described above.
 	
-	Using the data structure allowed to significantly reduce the time and computational resources for solving set of problems, such as constructing the convex hull. The algorithmic environment was implemented in Java programming language using its standard library. The main advantages of the developed algorithm are optimized preprocessing stage and the efficiently implemented merge step, due to the usage of concatenable queue.
+	Using the data structure allowed to significantly reduce the time and computational resources for solving a set of problems, such as constructing the convex hull. The algorithmic environment was implemented in Java programming language using its standard library. The main advantages of the developed algorithm are an optimized preprocessing stage and the efficiently implemented merge step, due to the usage of concatenable queue.
 	
 	The performance comparison for both types of execution allows to conclude that the algorithm has high level of parallelism. We`ve achieved speedup of $28\%$ in the best case. It is easy to extend functionality of the created environment either by adding new or modifying existing algorithms. This flexibility is achieved by using the modular principle in its design and choosing optimal abstractions to represent algorithms.
 

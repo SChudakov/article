@@ -1,0 +1,65 @@
++ line 2: Remove "and" or rephrase what you mean.
++ l.4: There was only one data structure, the concatenable queue.
+/ l.8: In the paper you don't explain at all how the queue is implemented as a binary tree.
++ l.8: in algorithm*s*
++ l.12: visualizing -> visualizations
++ l.13: requires->require
+- l.13: "set of problems": What kind of problems? Your statement is, in my opinion, too vague and too general. It just states: Nowadays one has to solve problems in parallel.
+- l.15: "methods": for what kind of problems? They seem related to image segmentation
++ l.20: In such case*s*
++ l.22: remove "the" before algorithmic
++ l.25: remove "the" before unified
++ l.27: remove "the" before preprocessing
++ l.28: *a* recursion tree. Or do you have specific tree in mind?
+- l.32: Give some introduction in Section 2 before starting with Subsection 2.1 (The same holds for other sections.)
++ l.33: "Stages of the algorithms" sounds better
++ l.36: show*n*
++ l.37: describe*d*
++ l.39: compromise*s*
++ l.39: such *a* problem
++ l.41-...: From now on you assume that k=2?
++ l.43: Let *the* points
+! l.46: It is not clear how this algorithm is related to the convex hull problem. And why are elements replaced and not deleted?
++ l.47: *a* two pointers technique
++ l.48: element*s*
+! l.51: Here you assume that the reader is aware that a splitting of the problem will occur. However, the reader is not. Therefore, give at the beginning a high-level overview of the algorithm.
+! l.51: What are the left and right parts? The points are in k-dimensional space, so, do you assume now that k=1?
++ l.52: a*n* array-like
+! l.53: The running time is not clear! First, do you mean O(1) times per operation or in total? Secondly, even O(1) per operation is not clear. Or do you assume that the array is sorted?
++ l.53: position*s*
++ l.54: First case -> The former case
++ l.54: tri*v*ial
++ l.56: *their* slope
++ l.59: for *the* points
+! l.60 (Table 1): How is upper and lower part defined?
+! l.61-...: The following description is hard to be followed and confusing. You should first state that you have two hulls, a left and a right one. Say what it exactly does mean that one hull is left and the other one is right. And then describe the cases in a clearer way and in such a way that it will be clear that you covered all possible cases, maybe each case in an own paragraph.
+! l.67: Figure 1 (and other figures) are not explained well enough. What do the colors mean? What are the orange curves?
++ l.71: comma after "after merging"
++ l.85: *the* correct
++ l.90: of->for ?
++ l.90: algorithm*s*
++ l.91: *a* "divide-..."
++ l.91: Remove "a" before "specific"
++ l.92-93: described *in* Listing 1.
++ l.97: Do you mean separate instead of divide?
+? l.98: implementation*s*
++ l.75 points->point?
++ l.101: *the* current
++ l.102: *the* input
++ l.102: *the* obtained
++ l.103: *the* obtained
++ l.107: remove . after "function2)"
++ l.108: *the* sub-problem*s*
+! l.110: Here you assume that the reader already knows that you implemented this model. But you never wrote it before, so this part is confusing. You should write somewhere in the beginning that you have implemented the model.
++ l.110: standpoint, *the* performance
+! l.113: The presentation has to be improved: Section 3 consist only of Subsection 3.1 (without any preliminaries before Subsection 3.1) and Subsection 3.1. consists of four lines of main text and a table.
+! l.114: Give more details on how you implemented the concatenable queue. In the abstract you mentioned that you use binary trees. Please also cite where one can read how to implement a concatenable queue with these running times.
++ l.116: What is UAEM?
++ l.118: theirs->their
++ l.119: Concate*n*able
++ l.153: on the -> in
++ l.157: We've: I think you use the wrong apostroph character
++ l.157: as well *as*
++ l.160: that *a* concatenable
++ l.163: "a set of problems" or "sets of problems" (depending on what you want to say)
++ l.165: *an* optimized ...

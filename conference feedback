@@ -1,0 +1,46 @@
+EURO CG
+
+#1
+- the results are well known
+- a good bachelor student can come up with the algorithm
+- the pictures are not very clear
+- grammatical errors
+- not clear from the introduction what you are trying to achieve
+- not clear definition of convex hull
+- compute convex hull for 3 points is trivial
+- red-black trees can be split/merged in O(log n) time and even faster datastructure
+
+#2
+- contribution seem to be interesting but is not clearly presented
+- only one datatructure
+- no definition of unified algorithmic environment
+- interrelated problems sets not specified
+- priniciple of devomposition is not specified
+- jump to 2d wihought notification
+- no real novelty because the paper combines well knows results
+- avoid lines starts with variables names
+- avoid using citation as object in sentence
+- omit x2 when enumerating variables
+- spell numbers up to 10
+- + text imporvements
+- topic is out of spope for the parer
+
+
+SoCG
+
+#1
+- Experimental & Evaluation : good fit
+- Title: parallel implementation of the 2d convex hull
+- 40 years old results
+- expreimental results are disappointing
+- no comparison with existing code is performed
+- software is not made available
+- unclear method of removing buplicates in the array
+- old citations
+
+#2
+- well known results
+- red-black trees are more efficient than concatenable queue
+
+#3
+- comparison with other implementations is not available
